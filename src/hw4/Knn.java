@@ -19,9 +19,12 @@ public class Knn extends Classifier {
     private static final int M_FOLD_NUM = 10;
     private static final int LPSDISTANCE = 0;
     private static final int LINFINITYDISTANCE = 1;
-    private static final int WEIGHTEDDISTANCE = 2;
+    private static final int WEIGHTED = 1;
+    private static final int NON_WEIGHTED = 0;
 
+    private int m_distance_mode = 0; //
     Instances m_trainingInstances;
+    Instances m_currentFolding_maj;
 
     public String getM_MODE() {
         return M_MODE;
@@ -51,8 +54,8 @@ public class Knn extends Classifier {
 
     private void noEdit(Instances instances) {
         m_trainingInstances = new Instances(instances);
-        //create 10 folds
-        Instances[] folds = foldIndices(m_trainingInstances, 10, true);
+        //normalize
+        normalize(instances);
 
         //create all possible subsets of the given instances attributes(features)
         ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
@@ -60,7 +63,6 @@ public class Knn extends Classifier {
         double bestError;
         int currK = 1;
         int bestK = 1;
-        int currP = 1;
         int bestp;
         int currPredictFold; // the current subset of instances that will be used for predicition
         Instances[] instArray;
@@ -79,39 +81,13 @@ public class Knn extends Classifier {
 
         //non weighted KNN
         for (int ksub = 0; ksub < Ksubsets.size(); ksub++) {
-            for (currP; currP <= 3; currP++) {
-
-                //calc l-p distance using 90% of the instances
-                //test hypothesis on the remaining 10%
-
-
-                for(int foldix = 0 ; foldix < 9 ; foldix++) {
-                    //get the division into 2 instance groups (9/10 ratio in our case)
-                    instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],m_trainingInstances);
-
-                    //use the 2 created arrays in order to test the KNN model
-                    //for each instance of  the smaller group, locate the K nearest neighbors according to the selected
-                    //function. After doing so, classify according to these neighbors.
-                    //keep classification
-                }
-
+            for (int currP = 0; currP <= 3; currP++) {
                 //calc cross-valiation-error
-                crossValidationError()
+                crossValidationError(m_trainingInstances);
             }
         }
 
-        //weighted KNN
-        for (int ksub = 0; ksub < Ksubsets.size(); ksub++) {
-            for (currP; currP <= 3; currP++) {
 
-                //calc l-p distance using 90% of the instances
-                //test hypothesis for the remaining 10%
-
-
-                //calculate error rate for given k and p
-
-            }
-        }
 
         //retain only the best (min error) classification and function
         //according to classification process
@@ -127,8 +103,19 @@ public class Knn extends Classifier {
      * @param instance an instance
      * @return the predicted target/class value of your algorithm for the input instance
      */
-    private double classify(Instance instance) {
+    public double classify(Instance instance) {
+        //we will classify the given instances using the instances in the majority fold (in our case 9 out 10 instances)
+        Instances neighbors = findNearestNeighbors(instance,m_curr_k);
+        double resultClass ;
 
+
+        if(m_distance_mode==NON_WEIGHTED)
+            resultClass = getClassVoteResult(neighbors);
+        else
+            resultClass = getWeightedClassVoteResult(neighbors,instance);
+
+        //return the resulting class
+        return resultClass;
     }
 
     /**
@@ -151,7 +138,7 @@ public class Knn extends Classifier {
         // classify each instance according to its proximity to the instance in question. Do this for the 5 best instances,
         // in case one instance is closer than another - remove all instance farther away and keep it.
 
-        Enumeration<Instance> instEnum = m_trainingInstances.enumerateInstances();
+        Enumeration<Instance> instEnum = m_currentFolding_maj.enumerateInstances();
 
         //The solution to find the k closet elements to the instance, will be implemented using an arraylist of pairs
         //the pairs will be of double and instance classes. Meaning, each key will be the distance and the value will
@@ -368,7 +355,7 @@ public class Knn extends Classifier {
                 correctClass++;
         }
 
-      return correctClass / instances.numInstances();
+      return correctClass / (double) instances.numInstances();
 	}
 
 	/**
@@ -376,8 +363,30 @@ public class Knn extends Classifier {
 	 * @param instances
 	 * @return the cross validation error of your algorithm on the input instances
      */
-	private double crossValidationError(Instances instances){
+	public double crossValidationError(Instances instances){
+        //get splitting indices for folding
+        int[] subsetIndices = foldIndices(instances,M_FOLD_NUM);
+        Instances[] instArray;
+        double[] errorArray = new double[M_FOLD_NUM];
+        double cvError = 0;
 
+        //calc l-p distance using 90% of the instances
+        //test hypothesis on the remaining 10%
+        for(int foldix = 0 ; foldix < 9 ; foldix++) {
+            //get the division into 2 instance groups (9/10 ratio in our case)
+            instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],instances);
+
+            //assign the current majority of the instances as the reference to the rest of them
+            m_currentFolding_maj = instArray[0];
+
+            //use the 2 created arrays in order to test the KNN model
+            calcAvgError(instArray[1]);
+            //for each instance of  the smaller group, locate the K nearest neighbors according to the selected
+            //function. After doing so, classify according to these neighbors.
+            //keep classification
+        }
+
+        return cvError;
 	}
 
 	/**
@@ -413,7 +422,6 @@ public class Knn extends Classifier {
         {
             System.out.println("An error has occured while attempting to normalize the dataset");
         }
-
 	}
 
 	//Assistive methods - normalization of feature data
@@ -465,6 +473,7 @@ public class Knn extends Classifier {
      * @return
      */
     private int[] foldIndices(Instances instances, int foldNum){
+        //// TODO: 20/04/2016
         //divide to the nearest integer value possible (last set might be smaller than int value by remainder)
         int instCount = m_trainingInstances.numInstances() / foldNum; //rounded version of course
         int remainder = m_trainingInstances.numInstances() % foldNum;

@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0261803c-52f8-4a3f-a626-0ad084678473" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/knn.docx" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/weka.jar" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/weka.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/cancer.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/glass.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/hw4/Knn.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/hw4/MainHW4.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/hw4/Knn.java" afterPath="$PROJECT_DIR$/src/hw4/Knn.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/hw4/MainHW4.java" afterPath="$PROJECT_DIR$/src/hw4/MainHW4.java" />
     </list>
     <ignored path="Homework4.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,8 +29,8 @@
       <file leaf-file-name="MainHW4.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/hw4/MainHW4.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-16.481482">
-              <caret line="47" column="37" selection-start-line="47" selection-start-column="37" selection-end-line="47" selection-end-column="37" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="50" column="0" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -47,15 +41,15 @@
       <file leaf-file-name="Knn.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/hw4/Knn.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8708752">
-              <caret line="513" column="0" selection-start-line="513" selection-start-column="0" selection-end-line="513" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.80631274">
+              <caret line="85" column="54" selection-start-line="85" selection-start-column="54" selection-end-line="85" selection-end-column="54" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#641#642#0" expanded="true" />
-                <element signature="e#670#671#0" expanded="true" />
-                <element signature="e#714#715#0" expanded="true" />
-                <element signature="e#745#746#0" expanded="true" />
-                <element signature="e#4894#4918#0" expanded="true" />
+                <element signature="e#756#757#0" expanded="true" />
+                <element signature="e#785#786#0" expanded="true" />
+                <element signature="e#829#830#0" expanded="true" />
+                <element signature="e#860#861#0" expanded="true" />
+                <element signature="e#4371#4395#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -729,12 +723,12 @@
       <created>1460962095082</created>
       <option name="number" value="Default" />
       <updated>1460962095082</updated>
-      <workItem from="1460962096881" duration="30750000" />
+      <workItem from="1460962096881" duration="34022000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="30750000" />
+    <option name="totallyTimeSpent" value="34022000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1920" height="1085" extended-state="6" />
@@ -821,8 +815,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/hw4/MainHW4.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-16.481482">
-          <caret line="47" column="37" selection-start-line="47" selection-start-column="37" selection-end-line="47" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="50" column="0" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -831,15 +825,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/hw4/Knn.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8708752">
-          <caret line="513" column="0" selection-start-line="513" selection-start-column="0" selection-end-line="513" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.80631274">
+          <caret line="85" column="54" selection-start-line="85" selection-start-column="54" selection-end-line="85" selection-end-column="54" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#641#642#0" expanded="true" />
-            <element signature="e#670#671#0" expanded="true" />
-            <element signature="e#714#715#0" expanded="true" />
-            <element signature="e#745#746#0" expanded="true" />
-            <element signature="e#4894#4918#0" expanded="true" />
+            <element signature="e#756#757#0" expanded="true" />
+            <element signature="e#785#786#0" expanded="true" />
+            <element signature="e#829#830#0" expanded="true" />
+            <element signature="e#860#861#0" expanded="true" />
+            <element signature="e#4371#4395#0" expanded="true" />
           </folding>
         </state>
       </provider>

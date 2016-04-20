@@ -42,10 +42,14 @@ public class MainHW4 {
 		//load data
 		Instances dataSet = loadData("glass.txt");
 
-
 		//run the knn nearest neighbor classification process (find lower cross validation error, giving best performance)
 		//using getclassvoteresult and getweightedclassvoteresult functions, all k values and all p values
-		Knn.buildClassifier(dataSet);
+		Knn ourKnn = new Knn();
+
+		ourKnn.buildClassifier(dataSet);
+
+
+
 
 		//output the cross validation error for both data sets
 		String cverror_glass = "Cross validation error with K = <my_k>, p = <my_p>, vote function = <either weighted or uniform> for glass data is: <my_error>";
