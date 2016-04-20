@@ -60,12 +60,14 @@ public class Knn extends Classifier {
         //create all possible subsets of the given instances attributes(features)
         ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
 
-        double bestError;
+        double bestError = Double.MAX_VALUE;
         int currK = 1;
-        int bestK = 1;
+        int[] bestK ;
+        int bestKNum = 0;
         int bestp;
-        int currPredictFold; // the current subset of instances that will be used for predicition
-        Instances[] instArray;
+        int bestMethod;
+        double currError;
+
 
 //        Loop over all combinations of k & p
 //        In each combination:
@@ -79,13 +81,28 @@ public class Knn extends Classifier {
         //get splitting indices for folding
         int[] subsetIndices = foldIndices(m_trainingInstances,M_FOLD_NUM);
 
-        //non weighted KNN
+        //non weighted KNN - for all p values (1,2,3)
         for (int ksub = 0; ksub < Ksubsets.size(); ksub++) {
             for (int currP = 0; currP <= 3; currP++) {
                 //calc cross-valiation-error
-                crossValidationError(m_trainingInstances);
+                //note: the 0 value for currP, designates infinity
+                //todo
+                currError = crossValidationError(m_trainingInstances);
+
+                if(currError<bestError) {
+                    bestError = currError;
+                    bestKNum = countNonZeroElements(Ksubsets.get(ksub));
+                    bestK = Ksubsets.get(ksub);
+                    bestp = currP;
+                    bestMethod = NON_WEIGHTED;
+                }
             }
+
+            //keep only the best K and P values, AND the best crossvalidationerror
         }
+
+        //todo calculate the weighted!!!***
+
 
 
 
@@ -94,6 +111,19 @@ public class Knn extends Classifier {
 
     }
 
+    /**
+     *  a simply function that counts the number of non zero elements within an int array
+     *  @param arr the array
+     *  @return the number of non zero elements
+     */
+    private static int countNonZeroElements(int[] arr){
+        int count=0;
+
+        for(int i = 0 ; i < arr.length; i++){
+            if(arr[i]!=0)
+                count++;
+        }
+    }
 
     // Implementation of methods required
 
