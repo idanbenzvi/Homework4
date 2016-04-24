@@ -105,7 +105,7 @@ public class Knn extends Classifier {
         //ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
 
 
-        for (int ksub = 0; ksub < 30; ksub++) {
+        for (int ksub = 0; ksub <= 30; ksub++) {
             for (int currP = 0; currP <= 3; currP++) {
                 //calc cross-valiation-error
                 //note: the 0 value for currP, designates infinity
@@ -116,6 +116,10 @@ public class Knn extends Classifier {
 
 //                //m_currKatts = Ksubsets.get(ksub);
 //                m_currKatts = ksub;
+
+                System.out.println("current k:"+ksub);
+                System.out.println("current p:"+currP);
+                System.out.println("current classification function: "+M_DISTFUNC);
 
                 currError = crossValidationError(m_trainingInstances);
 
@@ -180,10 +184,11 @@ public class Knn extends Classifier {
         
         //given an instance - find it's k nearest neighbors.
         //HOW: locate the k neighbors that have the minimal distance from the given instance.
-        Instances neighbors = new Instances;
+
         ArrayList<Pair<Double,Instance>> distList = new ArrayList<Pair<Double, Instance>>(k);
         double currDist ; // the current distance
         boolean added = false; //did we add an element the k neighbors list
+        Instances neighbors = new Instances(m_trainingInstances,m_trainingInstances.numInstances());
 
         // classify each instance according to its proximity to the instance in question. Do this for the 5 best instances,
         // in case one instance is closer than another - remove all instance farther away and keep it.
@@ -227,7 +232,10 @@ public class Knn extends Classifier {
                     //arraylist we've created.
                     if (currDistofInst > currDist) {
                         //add the new instance and its distance to the list
-                        distList.add(distList.indexOf(currPair) - 1, newp);
+                        if(distList.indexOf(currPair)!=0)
+                            distList.add(distList.indexOf(currPair) - 1, newp);
+                        else
+                            distList.add(0,newp); //if it is the first position to be handled and replaced
 
                         // remove pairs exceeding the k neighbors capacity limit
                         if (distList.size() > k)
@@ -405,6 +413,8 @@ public class Knn extends Classifier {
                 correctClass++;
         }
 
+        System.out.println("calculated average error");
+
       return correctClass / (double) instances.numInstances();
 	}
 
@@ -423,7 +433,10 @@ public class Knn extends Classifier {
         //calc l-p distance using 90% of the instances
         //test hypothesis on the remaining 10%
 
-        for(int foldix = 0 ; foldix < 9 ; foldix++) {
+        for(int foldix = 0 ; foldix <= 9 ; foldix++) {
+
+            System.out.println("current fold being evaluated is:"+foldix);
+
             //get the division into 2 instance groups (9/10 ratio in our case)
             instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],instances);
 
@@ -527,18 +540,20 @@ public class Knn extends Classifier {
         //// TODO: 20/04/2016
         //divide to the nearest integer value possible (last set might be smaller than int value by remainder)
         int instCount = m_trainingInstances.numInstances() / foldNum; //rounded version of course
-        int remainder = m_trainingInstances.numInstances() % foldNum;
-        int addOne = (remainder > 0) ? 1 : 0;
-        int[] foldIndexArray = new int[instCount + addOne];
+        //int remainder = m_trainingInstances.numInstances() % foldNum;
+        //int addOne = (remainder > 0) ? 1 : 0;
+        int[] foldIndexArray = new int[12];
 
         int ix = 0;
 
         //keep only the indices of the instances that are cutoff points between sets (each one composing of 10%)
-        for(int i = 0;  i < instances.numInstances(); i++){
+        for(int i = 0;  i <= instances.numInstances(); i++){
             if(i % instCount == 0) {
                 foldIndexArray[ix] = i;
                 ix++;
             }
+            if(i == instances.numInstances())
+                foldIndexArray[ix]=instances.numInstances()-1;
         }
 
         return foldIndexArray;
@@ -555,14 +570,17 @@ public class Knn extends Classifier {
     private Instances[] getFoldInstances(int start,int end,Instances instances){
         Enumeration<Instance> instEnum = instances.enumerateInstances();
         int ix = 0;
-        Instances[] instancesArray = new Instances[2];
-
+        Instances[] instancesArray = new Instances[2] ;
+        instancesArray[0] = new Instances(instances,instances.numInstances());
+        instancesArray[1] = new Instances(instances,instances.numInstances());
         //as long as there are more elements to divide - keep on going
         while(instEnum.hasMoreElements()){
-            if(ix<start || ix>end)
+            if(ix<start || ix > end)
                 instancesArray[0].add(instEnum.nextElement()); //add to the first instances group (majority of 90%)
             else
                 instancesArray[1].add(instEnum.nextElement()); //the smaller group (in our case will be 10%)
+            ix++;
+
         }
 
         return instancesArray;
