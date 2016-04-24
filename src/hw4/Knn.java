@@ -14,11 +14,13 @@ public class Knn extends Classifier {
 
     private String M_MODE = "";
     private int M_DISTFUNC;
+
     private int M_P_VALUE = 1; // by default
+    private int m_k_value = 1; // by default
 
     private static final int M_FOLD_NUM = 10;
-    private static final int LPSDISTANCE = 0;
-    private static final int LINFINITYDISTANCE = 1;
+    private static final int LPSDISTANCE = 1;
+    private static final int LINFINITYDISTANCE = 0;
     private static final int WEIGHTED = 1;
     private static final int NON_WEIGHTED = 0;
 
@@ -112,7 +114,7 @@ public class Knn extends Classifier {
     }
 
     /**
-     *  a simply function that counts the number of non zero elements within an int array
+     *  a simple function that counts the number of non zero elements within an int array
      *  @param arr the array
      *  @return the number of non zero elements
      */
@@ -123,6 +125,8 @@ public class Knn extends Classifier {
             if(arr[i]!=0)
                 count++;
         }
+
+        return count;
     }
 
     // Implementation of methods required

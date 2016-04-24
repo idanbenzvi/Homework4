@@ -40,22 +40,34 @@ public class MainHW4 {
 	public static void main (String [] args) throws Exception{
 
 		//load data
-		Instances dataSet = loadData("glass.txt");
+		Instances dataSet_glass = loadData("glass.txt");
+		Instances dataSet_cancer = loadData("cancer.txt");
 
 		//run the knn nearest neighbor classification process (find lower cross validation error, giving best performance)
 		//using getclassvoteresult and getweightedclassvoteresult functions, all k values and all p values
 		Knn ourKnn = new Knn();
-		ourKnn.buildClassifier(dataSet);
-
-        //after selecting the best K, P and function, return the cross validation error of this set
-        //// TODO: 20/04/2016
+		ourKnn.buildClassifier(dataSet_glass);
 
 		//output the cross validation error for both data sets
 		String cverror_glass = "Cross validation error with K = <my_k>, p = <my_p>, vote function = <either weighted or uniform> for glass data is: <my_error>";
 
+
+		//after selecting the best K, P and function, return the cross validation error of this set
+        //// TODO: 20/04/2016
+
+		//repeat process for cancer dataset
+		ourKnn.buildClassifier(dataSet_cancer);
+
 		String cverror_cancer = "Cross validation error with K = <my_k>, p = <my_p>, vote function = <either weighted or uniform> for cancer data is: <my_error>";
 	}
 
+	//// TODO: 24/04/2016
+	// todolist:
+	// finish the forward backward
+	// test
+	// create keeping values of k p and function
+	// make sure i deal correctly with continuous values
+	// compare results
 
 
 }
