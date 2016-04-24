@@ -16,7 +16,7 @@ public class Knn extends Classifier {
     private int M_DISTFUNC;
 
     private int M_P_VALUE = 1; // by default
-    private int m_k_value = 1; // by default
+
 
     private static final int M_FOLD_NUM = 10;
     private static final int LPSDISTANCE = 1;
@@ -27,6 +27,14 @@ public class Knn extends Classifier {
     private int m_distance_mode = 0; //
     Instances m_trainingInstances;
     Instances m_currentFolding_maj;
+
+    //public since we want it to be available outside the scope of the class
+    public double m_bestError;
+    public double m_bestK = 1;
+    public double m_bestP = 0;
+    private int[] m_bestKatts;
+    private int m_currK;
+
 
     public String getM_MODE() {
         return M_MODE;
@@ -59,8 +67,6 @@ public class Knn extends Classifier {
         //normalize
         normalize(instances);
 
-        //create all possible subsets of the given instances attributes(features)
-        ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
 
         double bestError = Double.MAX_VALUE;
         int currK = 1;
@@ -80,36 +86,46 @@ public class Knn extends Classifier {
 
         //run through all k values and all p values, using the 2 classification methods
 
-        //get splitting indices for folding
-        int[] subsetIndices = foldIndices(m_trainingInstances,M_FOLD_NUM);
+        //retain only the best (min error) classification and function
+        //according to classification process
 
-        //non weighted KNN - for all p values (1,2,3)
-        for (int ksub = 0; ksub < Ksubsets.size(); ksub++) {
+        trainModel(WEIGHTED);
+
+        trainModel(NON_WEIGHTED);
+
+    }
+
+    /**
+     *test all k,p values
+     */
+    private void trainModel(int functionType){
+        double currError;
+
+        //create all possible subsets of the given instances attributes(features)
+        //ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
+
+
+        for (int ksub = 0; ksub < 30; ksub++) {
             for (int currP = 0; currP <= 3; currP++) {
                 //calc cross-valiation-error
                 //note: the 0 value for currP, designates infinity
                 //todo
+
+                //set function to be weighted
+                M_DISTFUNC = functionType;
+
+//                //m_currKatts = Ksubsets.get(ksub);
+//                m_currKatts = ksub;
+
                 currError = crossValidationError(m_trainingInstances);
 
-                if(currError<bestError) {
-                    bestError = currError;
-                    bestKNum = countNonZeroElements(Ksubsets.get(ksub));
-                    bestK = Ksubsets.get(ksub);
-                    bestp = currP;
-                    bestMethod = NON_WEIGHTED;
+                if(currError<m_bestError) {
+                    m_bestError = currError;
+                    m_bestK = ksub;
+                    m_bestP = currP;
                 }
             }
-
-            //keep only the best K and P values, AND the best crossvalidationerror
         }
-
-        //todo calculate the weighted!!!***
-
-
-
-
-        //retain only the best (min error) classification and function
-        //according to classification process
 
     }
 
@@ -139,9 +155,9 @@ public class Knn extends Classifier {
      */
     public double classify(Instance instance) {
         //we will classify the given instances using the instances in the majority fold (in our case 9 out 10 instances)
-        Instances neighbors = findNearestNeighbors(instance,m_curr_k);
         double resultClass ;
 
+        Instances neighbors = findNearestNeighbors(instance,m_currK);
 
         if(m_distance_mode==NON_WEIGHTED)
             resultClass = getClassVoteResult(neighbors);
@@ -406,6 +422,7 @@ public class Knn extends Classifier {
 
         //calc l-p distance using 90% of the instances
         //test hypothesis on the remaining 10%
+
         for(int foldix = 0 ; foldix < 9 ; foldix++) {
             //get the division into 2 instance groups (9/10 ratio in our case)
             instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],instances);
