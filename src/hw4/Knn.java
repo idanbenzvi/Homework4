@@ -13,18 +13,18 @@ import java.util.*;
 public class Knn extends Classifier {
 
     private String M_MODE = "";
+
+    //weighted / non weighted distance function
     private int M_DISTFUNC;
-
-    private int M_P_VALUE = 1; // by default
-
-
-    private static final int M_FOLD_NUM = 10;
-    private static final int LPSDISTANCE = 1;
-    private static final int LINFINITYDISTANCE = 0;
     private static final int WEIGHTED = 1;
     private static final int NON_WEIGHTED = 0;
 
-    private int m_distance_mode = 0; //
+    //p values field
+    private int M_P_VALUE = 0; // by default
+
+    //constants of the KNN implementation
+    private static final int M_FOLD_NUM = 10;
+
     Instances m_trainingInstances;
     Instances m_currentFolding_maj;
 
@@ -32,7 +32,6 @@ public class Knn extends Classifier {
     public double m_bestError;
     public double m_bestK = 1;
     public double m_bestP = 0;
-    private int[] m_bestKatts;
     private int m_currK;
 
 
@@ -112,8 +111,8 @@ public class Knn extends Classifier {
                 //todo
 
                 //set function to be weighted
-                M_DISTFUNC = functionType;
-
+                M_DISTFUNC = functionType; //weighted vs. non-weigthed
+                M_P_VALUE = currP;
 //                //m_currKatts = Ksubsets.get(ksub);
 //                m_currKatts = ksub;
 
@@ -163,7 +162,9 @@ public class Knn extends Classifier {
 
         Instances neighbors = findNearestNeighbors(instance,m_currK);
 
-        if(m_distance_mode==NON_WEIGHTED)
+        System.out.println("using M_Dist: "+M_DISTFUNC);
+
+        if(M_DISTFUNC==NON_WEIGHTED)
             resultClass = getClassVoteResult(neighbors);
         else
             resultClass = getWeightedClassVoteResult(neighbors,instance);
@@ -335,14 +336,11 @@ public class Knn extends Classifier {
     private double distance(Instance a, Instance b) {
         double distance =0;
 
-        switch (M_DISTFUNC) {
-            case LPSDISTANCE: //distance according to L-P Distance function
+        if(M_P_VALUE>0)
                 distance = lPDistance(a, b);
-                break;
-            case LINFINITYDISTANCE: //distance according to L Infinity function
+            else
                 distance = lInfinityDistance(a, b);
-                break;
-        }
+
 
         return distance;
 	}
