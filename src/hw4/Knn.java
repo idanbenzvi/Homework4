@@ -29,7 +29,7 @@ public class Knn extends Classifier {
     Instances m_currentFolding_maj;
 
     //public since we want it to be available outside the scope of the class
-    public double m_bestError;
+    public double m_bestError = Double.MAX_VALUE;
     public double m_bestK = 1;
     public double m_bestP = 0;
     private int m_currK;
@@ -66,6 +66,10 @@ public class Knn extends Classifier {
         //normalize
         normalize(instances);
 
+        //reset all fields
+        m_bestError = Double.MAX_VALUE;
+        m_bestK = 1;
+        m_bestP = 0;
 
         double bestError = Double.MAX_VALUE;
         int currK = 1;
@@ -88,10 +92,8 @@ public class Knn extends Classifier {
         //retain only the best (min error) classification and function
         //according to classification process
 
-        trainModel(WEIGHTED);
-
         trainModel(NON_WEIGHTED);
-
+        trainModel(WEIGHTED);
     }
 
     /**
@@ -113,19 +115,24 @@ public class Knn extends Classifier {
                 //set function to be weighted
                 M_DISTFUNC = functionType; //weighted vs. non-weigthed
                 M_P_VALUE = currP;
+                m_currK = ksub;
 //                //m_currKatts = Ksubsets.get(ksub);
 //                m_currKatts = ksub;
 
-                System.out.println("current k:"+ksub);
-                System.out.println("current p:"+currP);
-                System.out.println("current classification function: "+M_DISTFUNC);
+//                System.out.println("current k:"+ksub);
+//                System.out.println("current p:"+currP);
+//                System.out.println("current classification function: "+M_DISTFUNC);
 
                 currError = crossValidationError(m_trainingInstances);
 
+                System.out.println("current error: "+currError);
+
                 if(currError<m_bestError) {
+                    System.out.println("UPDATED error values");
                     m_bestError = currError;
                     m_bestK = ksub;
                     m_bestP = currP;
+                    java.awt.Toolkit.getDefaultToolkit().beep();
                 }
             }
         }
@@ -162,7 +169,7 @@ public class Knn extends Classifier {
 
         Instances neighbors = findNearestNeighbors(instance,m_currK);
 
-        System.out.println("using M_Dist: "+M_DISTFUNC);
+        //System.out.println("using M_Dist: "+M_DISTFUNC);
 
         if(M_DISTFUNC==NON_WEIGHTED)
             resultClass = getClassVoteResult(neighbors);
@@ -411,9 +418,7 @@ public class Knn extends Classifier {
                 correctClass++;
         }
 
-        System.out.println("calculated average error");
-
-      return correctClass / (double) instances.numInstances();
+      return (double) correctClass / (double) instances.numInstances();
 	}
 
 	/**
@@ -433,20 +438,25 @@ public class Knn extends Classifier {
 
         for(int foldix = 0 ; foldix <= 9 ; foldix++) {
 
-            System.out.println("current fold being evaluated is:"+foldix);
+            //System.out.println("current fold being evaluated is:"+foldix);
 
             //get the division into 2 instance groups (9/10 ratio in our case)
             instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],instances);
+
+         //   System.out.println(subsetIndices[foldix]+" "+subsetIndices[foldix+1]);
 
             //assign the current majority of the instances as the reference to the rest of them
             m_currentFolding_maj = instArray[0];
 
             //use the 2 created arrays in order to test the KNN model
-            calcAvgError(instArray[1]);
+            cvError += calcAvgError(instArray[1]);
             //for each instance of  the smaller group, locate the K nearest neighbors according to the selected
             //function. After doing so, classify according to these neighbors.
             //keep classification
         }
+
+        //divide the sum of errors by the number of folds to calculate the cross validation error
+        cvError /= M_FOLD_NUM;
 
         return cvError;
 	}
@@ -540,7 +550,7 @@ public class Knn extends Classifier {
         int instCount = m_trainingInstances.numInstances() / foldNum; //rounded version of course
         //int remainder = m_trainingInstances.numInstances() % foldNum;
         //int addOne = (remainder > 0) ? 1 : 0;
-        int[] foldIndexArray = new int[12];
+        int[] foldIndexArray = new int[11];
 
         int ix = 0;
 
@@ -551,7 +561,7 @@ public class Knn extends Classifier {
                 ix++;
             }
             if(i == instances.numInstances())
-                foldIndexArray[ix]=instances.numInstances()-1;
+                foldIndexArray[ix-1]=instances.numInstances()-1;
         }
 
         return foldIndexArray;
