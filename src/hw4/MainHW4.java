@@ -49,8 +49,8 @@ public class MainHW4 {
 		ourKnn.buildClassifier(dataSet_glass);
 
 		//output the cross validation error for both data sets
-		String cverror_glass = "Cross validation error with K = <my_k>, p = <my_p>, vote function = <either weighted or uniform> for glass data is: <my_error>";
-
+		String cverror_glass = "Cross validation error with K = "+ourKnn.getM_bestK()+", p = "+ourKnn.getM_bestP()+", vote function = "+ourKnn.getM_bestFunc()+" for glass data is: "+ourKnn.getM_bestError();
+		System.out.println(cverror_glass);
 
 		//after selecting the best K, P and function, return the cross validation error of this set
         //// TODO: 20/04/2016
@@ -58,7 +58,8 @@ public class MainHW4 {
 		//repeat process for cancer dataset
 		ourKnn.buildClassifier(dataSet_cancer);
 
-		String cverror_cancer = "Cross validation error with K = <my_k>, p = <my_p>, vote function = <either weighted or uniform> for cancer data is: <my_error>";
+		String cverror_cancer = "Cross validation error with K = "+ourKnn.getM_bestK()+", p = "+ourKnn.getM_bestP()+", vote function = "+ourKnn.getM_bestFunc()+" for cancer data is: "+ourKnn.getM_bestError();
+		System.out.println(cverror_cancer);
 	}
 
 	//// TODO: 24/04/2016

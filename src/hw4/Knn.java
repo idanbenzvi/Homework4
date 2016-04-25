@@ -24,14 +24,33 @@ public class Knn extends Classifier {
 
     //constants of the KNN implementation
     private static final int M_FOLD_NUM = 10;
+    private static final int M_K_MAX = 30;
 
     Instances m_trainingInstances;
     Instances m_currentFolding_maj;
+
+    public double getM_bestError() {
+        return m_bestError;
+    }
+
+    public double getM_bestK() {
+        return m_bestK;
+    }
+
+    public double getM_bestP() {
+        return m_bestP;
+    }
 
     //public since we want it to be available outside the scope of the class
     public double m_bestError = Double.MAX_VALUE;
     public double m_bestK = 1;
     public double m_bestP = 0;
+
+    public int getM_bestFunc() {
+        return m_bestFunc;
+    }
+
+    public int m_bestFunc = 0;
     private int m_currK;
 
 
@@ -106,7 +125,7 @@ public class Knn extends Classifier {
         //ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
 
 
-        for (int ksub = 0; ksub <= 30; ksub++) {
+        for (int ksub = 1; ksub <= M_K_MAX; ksub++) {
             for (int currP = 0; currP <= 3; currP++) {
                 //calc cross-valiation-error
                 //note: the 0 value for currP, designates infinity
@@ -125,13 +144,14 @@ public class Knn extends Classifier {
 
                 currError = crossValidationError(m_trainingInstances);
 
-                System.out.println("current error: "+currError);
+//                System.out.println("current error: "+currError);
 
                 if(currError<m_bestError) {
                     System.out.println("UPDATED error values");
                     m_bestError = currError;
                     m_bestK = ksub;
                     m_bestP = currP;
+                    m_bestFunc = functionType;
                     java.awt.Toolkit.getDefaultToolkit().beep();
                 }
             }
