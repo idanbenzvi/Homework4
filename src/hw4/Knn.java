@@ -43,8 +43,8 @@ public class Knn extends Classifier {
 
     //public since we want it to be available outside the scope of the class
     public double m_bestError = Double.MAX_VALUE;
-    public double m_bestK = 1;
-    public double m_bestP = 0;
+    public int m_bestK = 1;
+    public int m_bestP = 0;
 
     public int getM_bestFunc() {
         return m_bestFunc;
@@ -135,8 +135,6 @@ public class Knn extends Classifier {
                 M_DISTFUNC = functionType; //weighted vs. non-weigthed
                 M_P_VALUE = currP;
                 m_currK = ksub;
-//                //m_currKatts = Ksubsets.get(ksub);
-//                m_currKatts = ksub;
 
 //                System.out.println("current k:"+ksub);
 //                System.out.println("current p:"+currP);
