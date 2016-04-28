@@ -158,6 +158,10 @@ public class Knn extends Classifier {
 
         //model has been trained, classification can now be done over the whole original dataset
         m_training = false;
+        //set parameters after training (no need to set K value 
+        M_DISTFUNC = m_bestFunc;
+        M_P_VALUE = m_bestP;
+        m_currK = m_bestK;
     }
 
     // Implementation of methods required
@@ -168,11 +172,11 @@ public class Knn extends Classifier {
      * @param instance an instance
      * @return the predicted target/class value of your algorithm for the input instance
      */
-    public double classify(Instance instance) {
+    public double classify(Instance instance,Instances classifySet) {
         //we will classify the given instances using the instances in the majority fold (in our case 9 out 10 instances)
         double resultClass ;
 
-        Instances neighbors = findNearestNeighbors(instance,m_currK);
+        Instances neighbors = findNearestNeighbors(instance,classifySet,m_currK);
 
         if(M_DISTFUNC==NON_WEIGHTED)
             resultClass = getClassVoteResult(neighbors);
@@ -415,14 +419,14 @@ public class Knn extends Classifier {
 	 * @param instances
 	 * @return the average error on the input instances.
 	 */
-	private double calcAvgError(Instances instances){
+	private double calcAvgError(Instances instances,Instances classifySet){
         Enumeration instEnum = instances.enumerateInstances();
         double classification ;
         double correctClass = 0;
 
         while(instEnum.hasMoreElements()) {
             Instance currentElement = (Instance) instEnum.nextElement();
-            classification = classify(currentElement);
+            classification = classify(currentElement,classifySet);
             if(currentElement.classValue()==classification)
                 correctClass++;
         }
@@ -456,12 +460,12 @@ public class Knn extends Classifier {
          //   System.out.println(subsetIndices[foldix]+" "+subsetIndices[foldix+1]);
 
             //assign the current majority of the instances as the reference to the rest of them
-            m_currentFolding_maj = instArray[0];
+            //m_currentFolding_maj = instArray[0];
 
             //use the 2 created arrays in order to test the KNN model
             double start = System.nanoTime();
 
-            cvError += calcAvgError(instArray[1]);
+            cvError += calcAvgError(instArray[1],instArray[0]);
 
             double end = System.nanoTime();
 
@@ -484,35 +488,34 @@ public class Knn extends Classifier {
 	 * should train your Knn algorithm using the edited Knn forwards algorithm shown in class
 	 */
 		public void	editedForward(Instances instances){
-            //create an empty instances object (our T)
-            Instances newInstances = new Instances(m_trainingInstances,m_trainingInstances.numInstances());
 
-            //normalize the instances
-            instances = normalize(instances);
-
-            //the first instance will not be classified correctly, since T is empty, therefore we can add it
-            newInstances.add(instances.instance(0));
-            instances.delete(0);
-
-            m_training = true; //return to training mode in order to enable the incremental construction of the instance
-            // set according to the forwards knn model
-            //what this means is : (calculate neighbors from: m_currentFolding_maj = newInstances;)
-
-            //each one of the remaining instances is to be checked
-            for(int i = 0; i < instances.numInstances()-1 ; i++){
-                if(classify(instances.instance(i))!=instances.instance(i).classValue()){
-                    newInstances.add(instances.instance(i));
-                }
-            }
-
-            m_bestError = crossValidationError(newInstances);
-
+            //general outline:
 //            T = ∅
 //            For each instance x in S
 //            if x is not classified correctly by T
 //            add x to T
 //            Return T
 
+            //implementation:
+
+            //create an empty instances object (our T)
+            Instances newInstances = new Instances(m_trainingInstances,m_trainingInstances.numInstances());
+
+            //normalize the instances given as input to the KNN
+            instances = normalize(instances);
+
+            //the first instance will not be classified correctly, since T is empty, therefore we can add it
+            newInstances.add(instances.instance(0));
+            instances.delete(0); // remove the instance from the instances class
+
+            //each one of the remaining instances is to be checked according to the above logic
+            for(int i = 0; i < instances.numInstances(); i++){
+                if(classify(instances.instance(i),newInstances)!=instances.instance(i).classValue()){
+                    newInstances.add(instances.instance(i));
+                }
+            }
+
+            m_bestError = crossValidationError(newInstances);
         }
 
 	/**
@@ -521,7 +524,14 @@ public class Knn extends Classifier {
      */
 	 public void editedBackward(Instances instances){
 
-         m_trainingInstances = normalize(instances);
+         //general outline of algorithm:
+        //         T = S
+        //         For each instance x in T
+        //         if x is classified correctly by T-{x}
+        //         remove x from T
+        //         Return T
+
+         //m_trainingInstances = normalize(instances);
 
          //after training the model and calculating the optimal functions and parameters
          //prune unrequired instances using the backwards method
@@ -530,12 +540,12 @@ public class Knn extends Classifier {
 
          //// TODO: 28/04/2016 see this running
          while(currIx!=endPoint){
-             Instance currInst = m_trainingInstances.instance(currIx);
-             m_trainingInstances.delete(currIx);
-             if(classify(currInst)!=currInst.classValue()) {
-                 m_trainingInstances.add(currInst);
+             Instance currInst = instances.instance(currIx);
+             instances.delete(currIx);
+             if(classify(currInst,instances)!=currInst.classValue()) {
+                 instances.add(currInst);
                  currIx++;
-                 System.out.println("checking"+currInst.classValue()+"vs."+classify(currInst));
+                 System.out.println("checking"+currInst.classValue()+"vs."+classify(currInst,instances));
              }else{
                  endPoint--;
              }
