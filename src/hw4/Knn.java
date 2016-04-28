@@ -441,6 +441,9 @@ public class Knn extends Classifier {
      */
 	public double crossValidationError(Instances instances){
         //get splitting indices for folding
+        if(instances.numInstances()<50)
+            System.out.println("cool");
+
         int[] subsetIndices = foldIndices(instances,M_FOLD_NUM);
         Instances[] instArray;
 
@@ -488,16 +491,6 @@ public class Knn extends Classifier {
 	 * should train your Knn algorithm using the edited Knn forwards algorithm shown in class
 	 */
 		public void	editedForward(Instances instances){
-
-            //general outline:
-//            T = ∅
-//            For each instance x in S
-//            if x is not classified correctly by T
-//            add x to T
-//            Return T
-
-            //implementation:
-
             //create an empty instances object (our T)
             Instances newInstances = new Instances(m_trainingInstances,m_trainingInstances.numInstances());
 
@@ -545,7 +538,6 @@ public class Knn extends Classifier {
              if(classify(currInst,instances)!=currInst.classValue()) {
                  instances.add(currInst);
                  currIx++;
-                 System.out.println("checking"+currInst.classValue()+"vs."+classify(currInst,instances));
              }else{
                  endPoint--;
              }
@@ -591,21 +583,22 @@ public class Knn extends Classifier {
     private int[] foldIndices(Instances instances, int foldNum){
         //// TODO: 20/04/2016
         //divide to the nearest integer value possible (last set might be smaller than int value by remainder)
-        int instCount = m_trainingInstances.numInstances() / foldNum; //rounded version of course
+        int instCount = (int) Math.ceil( (double) instances.numInstances() / foldNum); //rounded version of course
         //int remainder = m_trainingInstances.numInstances() % foldNum;
         //int addOne = (remainder > 0) ? 1 : 0;
         int[] foldIndexArray = new int[11];
-
+        int multiplier = 1;
         int ix = 0;
+        foldIndexArray[0] = 0;
 
         //keep only the indices of the instances that are cutoff points between sets (each one composing of 10%)
-        for(int i = 0;  i <= instances.numInstances(); i++){
-            if(i % instCount == 0) {
-                foldIndexArray[ix] = i;
-                ix++;
+        while(multiplier*instCount <= instances.numInstances()){
+            foldIndexArray[multiplier] = multiplier * instCount;
+            multiplier++;
+
+            if(multiplier==10){
+                    foldIndexArray[10] = instances.numInstances();
             }
-            if(i == instances.numInstances())
-                foldIndexArray[ix-1]=instances.numInstances()-1;
         }
 
         return foldIndexArray;
