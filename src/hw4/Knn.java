@@ -28,6 +28,7 @@ public class Knn extends Classifier {
 
     Instances m_trainingInstances;
     Instances m_currentFolding_maj;
+    private boolean m_training;
 
     public double getM_bestError() {
         return m_bestError;
@@ -41,18 +42,19 @@ public class Knn extends Classifier {
         return m_bestP;
     }
 
-    //public since we want it to be available outside the scope of the class
-    public double m_bestError = Double.MAX_VALUE;
-    public int m_bestK = 1;
-    public int m_bestP = 0;
+    //public since we want parameters and performance measurements to be available outside the scope of the class:
+    private double m_bestError = Double.MAX_VALUE;
+    private int m_bestK = 1;
+    private int m_bestP = 0;
+    private int m_bestFunc = 0;
+
+    public double m_calcTimeAvg =0;
+
+    private int m_currK;
 
     public int getM_bestFunc() {
         return m_bestFunc;
     }
-
-    public int m_bestFunc = 0;
-    private int m_currK;
-
 
     public String getM_MODE() {
         return M_MODE;
@@ -120,16 +122,15 @@ public class Knn extends Classifier {
      */
     private void trainModel(int functionType){
         double currError;
+        m_training = true; // dataset is to be used only in folds until model is trained.
 
         //create all possible subsets of the given instances attributes(features)
         //ArrayList<int[]> Ksubsets = findSubsets(m_trainingInstances.numAttributes() - 1);
-
-
         for (int ksub = 1; ksub <= M_K_MAX; ksub++) {
             for (int currP = 0; currP <= 3; currP++) {
                 //calc cross-valiation-error
                 //note: the 0 value for currP, designates infinity
-                //todo
+
 
                 //set function to be weighted
                 M_DISTFUNC = functionType; //weighted vs. non-weigthed
@@ -155,22 +156,8 @@ public class Knn extends Classifier {
             }
         }
 
-    }
-
-    /**
-     *  a simple function that counts the number of non zero elements within an int array
-     *  @param arr the array
-     *  @return the number of non zero elements
-     */
-    private static int countNonZeroElements(int[] arr){
-        int count=0;
-
-        for(int i = 0 ; i < arr.length; i++){
-            if(arr[i]!=0)
-                count++;
-        }
-
-        return count;
+        //model has been trained, classification can now be done over the whole original dataset
+        m_training = false;
     }
 
     // Implementation of methods required
@@ -186,8 +173,6 @@ public class Knn extends Classifier {
         double resultClass ;
 
         Instances neighbors = findNearestNeighbors(instance,m_currK);
-
-        //System.out.println("using M_Dist: "+M_DISTFUNC);
 
         if(M_DISTFUNC==NON_WEIGHTED)
             resultClass = getClassVoteResult(neighbors);
@@ -205,7 +190,7 @@ public class Knn extends Classifier {
      * @param k        - num of neighbors wanted
      * @return finds the K nearest neighbors (and perhaps their distances)
      */
-    private Instances findNearestNeighbors(Instance instance, int k) {
+    private Instances findNearestNeighbors(Instance instance,Instances neighborhood, int k) {
         //// TODO: 20/04/2016 - check if the code works !!!! (debug it)
         
         //given an instance - find it's k nearest neighbors.
@@ -215,11 +200,17 @@ public class Knn extends Classifier {
         double currDist ; // the current distance
         boolean added = false; //did we add an element the k neighbors list
         Instances neighbors = new Instances(m_trainingInstances,m_trainingInstances.numInstances());
-
+        Enumeration<Instance> instEnum;
         // classify each instance according to its proximity to the instance in question. Do this for the 5 best instances,
         // in case one instance is closer than another - remove all instance farther away and keep it.
 
-        Enumeration<Instance> instEnum = m_currentFolding_maj.enumerateInstances();
+        //when training the KNN model to find the optimal parameters, we only use 9/10 instances (as the folds dictate)
+        //when this process is done, the neighbors are to be calculated over the whole dataset.
+//        if(m_training)
+//            instEnum = m_currentFolding_maj.enumerateInstances();
+//            else
+//            instEnum = m_trainingInstances.enumerateInstances();
+        instEnum = neighborhood.enumerateInstances();
 
         //The solution to find the k closet elements to the instance, will be implemented using an arraylist of pairs
         //the pairs will be of double and instance classes. Meaning, each key will be the distance and the value will
@@ -448,7 +439,8 @@ public class Knn extends Classifier {
         //get splitting indices for folding
         int[] subsetIndices = foldIndices(instances,M_FOLD_NUM);
         Instances[] instArray;
-        double[] errorArray = new double[M_FOLD_NUM];
+
+        double calcTimeAvg = 0;
         double cvError = 0;
 
         //calc l-p distance using 90% of the instances
@@ -467,7 +459,15 @@ public class Knn extends Classifier {
             m_currentFolding_maj = instArray[0];
 
             //use the 2 created arrays in order to test the KNN model
+            double start = System.nanoTime();
+
             cvError += calcAvgError(instArray[1]);
+
+            double end = System.nanoTime();
+
+            //calculate the elapsed time
+            calcTimeAvg += (end - start);
+
             //for each instance of  the smaller group, locate the K nearest neighbors according to the selected
             //function. After doing so, classify according to these neighbors.
             //keep classification
@@ -475,6 +475,7 @@ public class Knn extends Classifier {
 
         //divide the sum of errors by the number of folds to calculate the cross validation error
         cvError /= M_FOLD_NUM;
+        m_calcTimeAvg = calcTimeAvg / M_FOLD_NUM;
 
         return cvError;
 	}
@@ -483,8 +484,36 @@ public class Knn extends Classifier {
 	 * should train your Knn algorithm using the edited Knn forwards algorithm shown in class
 	 */
 		public void	editedForward(Instances instances){
+            //create an empty instances object (our T)
+            Instances newInstances = new Instances(m_trainingInstances,m_trainingInstances.numInstances());
 
-		}
+            //normalize the instances
+            instances = normalize(instances);
+
+            //the first instance will not be classified correctly, since T is empty, therefore we can add it
+            newInstances.add(instances.instance(0));
+            instances.delete(0);
+
+            m_training = true; //return to training mode in order to enable the incremental construction of the instance
+            // set according to the forwards knn model
+            //what this means is : (calculate neighbors from: m_currentFolding_maj = newInstances;)
+
+            //each one of the remaining instances is to be checked
+            for(int i = 0; i < instances.numInstances()-1 ; i++){
+                if(classify(instances.instance(i))!=instances.instance(i).classValue()){
+                    newInstances.add(instances.instance(i));
+                }
+            }
+
+            m_bestError = crossValidationError(newInstances);
+
+//            T = ∅
+//            For each instance x in S
+//            if x is not classified correctly by T
+//            add x to T
+//            Return T
+
+        }
 
 	/**
 	 * should train your Knn algorithm using the edited Knn backwards algorithm shown in class
@@ -492,12 +521,37 @@ public class Knn extends Classifier {
      */
 	 public void editedBackward(Instances instances){
 
-	 }
+         m_trainingInstances = normalize(instances);
+
+         //after training the model and calculating the optimal functions and parameters
+         //prune unrequired instances using the backwards method
+         int endPoint = m_trainingInstances.numInstances();
+         int currIx = 0;
+
+         //// TODO: 28/04/2016 see this running
+         while(currIx!=endPoint){
+             Instance currInst = m_trainingInstances.instance(currIx);
+             m_trainingInstances.delete(currIx);
+             if(classify(currInst)!=currInst.classValue()) {
+                 m_trainingInstances.add(currInst);
+                 currIx++;
+                 System.out.println("checking"+currInst.classValue()+"vs."+classify(currInst));
+             }else{
+                 endPoint--;
+             }
+         }
+
+         //calculate the error and the time it takes on average to calculate the error for each fold
+         m_bestError = crossValidationError(m_trainingInstances);
+
+         }
+
+
 
 	/**
 	 * perform a normalization process over all instance features
 	 */
-	public void normalize(Instances instances){
+	public Instances normalize(Instances instances){
         try {
             double means[] = new double[instances.numAttributes()];
             double tempSum = 0;
@@ -507,55 +561,17 @@ public class Knn extends Classifier {
             Instances processed_training_data = Filter.useFilter(instances, norm);
 
             m_trainingInstances = processed_training_data;
+
+            return processed_training_data;
         }
         catch(Exception e)
         {
             System.out.println("An error has occured while attempting to normalize the dataset");
+            return null;
         }
 	}
 
 	//Assistive methods - normalization of feature data
-
-	/**
-	 * generates an arraylist containing all the possible subsets of a given size (using bitmasks)
-	 * @param k - the number of subsets we want to generate
-	 * @return
-	 */
-	private static ArrayList<int[]> findSubsets(int k)
-	{
-		//create an int. array from 1 to k(included)
-		int[] array = new int[k];
-		for (int i = 1 ; i <= k ; i++){
-			array[i-1] = i;
-		}
-
-		int numOfSubsets = 1 << array.length;
-		ArrayList<int[]> elements = new ArrayList<int[]>();
-
-
-		for(int i = 0; i < numOfSubsets; i++)
-		{
-			int pos = array.length - 1;
-			int bitmask = i;
-			int ix = 0;
-			int[] currentArray = new int[array.length];
-
-			while(bitmask > 0)
-			{
-				if((bitmask & 1) == 1) {
-					currentArray[ix] = array[pos];
-					ix++;
-				}
-				bitmask >>= 1;
-				pos--;
-
-			}
-			elements.add(currentArray);
-		}
-
-		return elements;
-	}
-
 
     /**
      * divide the instances into k folds, of equal size. possibly shuffle instances if required
@@ -611,7 +627,5 @@ public class Knn extends Classifier {
 
         return instancesArray;
     }
-
-
 
 }
