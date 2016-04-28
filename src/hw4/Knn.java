@@ -158,7 +158,7 @@ public class Knn extends Classifier {
 
         //model has been trained, classification can now be done over the whole original dataset
         m_training = false;
-        //set parameters after training (no need to set K value 
+        //set parameters after training (no need to set K value
         M_DISTFUNC = m_bestFunc;
         M_P_VALUE = m_bestP;
         m_currK = m_bestK;
@@ -431,7 +431,7 @@ public class Knn extends Classifier {
                 correctClass++;
         }
 
-      return (double) correctClass / (double) instances.numInstances();
+      return 1 - ((double) correctClass / (double) instances.numInstances());
 	}
 
 	/**
