@@ -46,17 +46,34 @@ public class MainHW4 {
 		//run the knn nearest neighbor classification process (find lower cross validation error, giving best performance)
 		//using getclassvoteresult and getweightedclassvoteresult functions, all k values and all p values
 		Knn ourKnn = new Knn();
-//		ourKnn.buildClassifier(dataSet_glass);
-//
-//		//output the cross validation error for both data sets
-//		String cverror_glass = "Cross validation error with K = "+ourKnn.getM_bestK()+", p = "+ourKnn.getM_bestP()+", vote function = "+ourKnn.getM_bestFunc()+" for glass data is: "+ourKnn.getM_bestError();
-//		System.out.println(cverror_glass);
-//
-//		//repeat process for cancer dataset
-//		ourKnn.buildClassifier(dataSet_cancer);
-//
-//		String cverror_cancer = "Cross validation error with K = "+ourKnn.getM_bestK()+", p = "+ourKnn.getM_bestP()+", vote function = "+ourKnn.getM_bestFunc()+" for cancer data is: "+ourKnn.getM_bestError();
-//		System.out.println(cverror_cancer);
+		ourKnn.buildClassifier(dataSet_glass);
+
+        String voteFunctionString = "";
+
+        //assign correct meaning ot value of weight function
+        if(ourKnn.getM_bestFunc()==0)
+            voteFunctionString = "non-weighted";
+        else
+            voteFunctionString = "weighted";
+
+		//output the cross validation error for both data sets
+		String cverror_glass = "Cross validation error with K = "+ourKnn.getM_bestK()+", p = "+ourKnn.getM_bestP()+", vote function = "+voteFunctionString+" for glass data is: "+ourKnn.getM_bestError();
+		System.out.println(cverror_glass);
+
+		//repeat process for cancer dataset
+		ourKnn.buildClassifier(dataSet_cancer);
+
+        //assign correct meaning to value of weight function
+        if(ourKnn.getM_bestFunc()==0)
+            voteFunctionString = "non-weighted";
+        else
+            voteFunctionString = "weighted";
+
+		String cverror_cancer = "Cross validation error with K = "+ourKnn.getM_bestK()+", p = "+ourKnn.getM_bestP()+", vote function = "+voteFunctionString+" for cancer data is: "+ourKnn.getM_bestError();
+		System.out.println(cverror_cancer);
+
+
+        //*****************************************************************************************************************************************
 
 		// MOVING ONTO THE 2nd PART
 
@@ -84,14 +101,5 @@ public class MainHW4 {
 		System.out.println(CVEforward);
 
 	}
-
-	//// TODO: 24/04/2016
-	// todolist:
-	// finish the forward backward
-	// test
-	// create keeping values of k p and function
-	// make sure i deal correctly with continuous values
-	// compare results
-
 
 }
