@@ -81,6 +81,11 @@ public class Knn extends Classifier {
         }
     }
 
+    /**
+     * Create a KNN classifier and train it using cross-fold-validation while iterating over all possible
+     * k,p, and function types (weighted,non-weighted)
+     * @param instances
+     */
     private void noEdit(Instances instances) {
         //normalize all instance data
         instances = normalize(instances);
@@ -102,9 +107,9 @@ public class Knn extends Classifier {
         //retain only the best (min error) classification and function
         //according to classification process
 
+        //to avoid code duplication, the method trainModel has been added
         trainModel(NON_WEIGHTED,instances);
         trainModel(WEIGHTED,instances);
-
 
         //set parameters after training (no need to set K value - model training is complete
         M_DISTFUNC = m_bestFunc;
@@ -401,6 +406,7 @@ public class Knn extends Classifier {
         double classification ;
         double correctClass = 0;
 
+        //classify and compare to actual class value, count the number of correct classifications
         while(instEnum.hasMoreElements()) {
             Instance currentElement = (Instance) instEnum.nextElement();
             classification = classify(currentElement,classifySet);
@@ -409,6 +415,7 @@ public class Knn extends Classifier {
                 correctClass++;
         }
 
+        //return the percent of errors, from the total instance number required for classification
       return 1.0d - (correctClass / instances.numInstances());
 	}
 
@@ -431,7 +438,7 @@ public class Knn extends Classifier {
         for(int foldix = 0 ; foldix <= 9 ; foldix++) {
             //System.out.println("current fold being evaluated is:"+foldix);
 
-            //get the division into 2 instance groups (9/10 ratio in our case)
+            //get the division into 2 instance groups (9/10 ratio in our case), as 2 different Instances class objects
             instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],instances);
 
             //use the 2 created arrays in order to test the KNN model
