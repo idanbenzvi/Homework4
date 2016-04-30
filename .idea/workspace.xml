@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0261803c-52f8-4a3f-a626-0ad084678473" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/~$knn.docx" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Homework4/hw4/Knn.class" afterPath="$PROJECT_DIR$/out/production/Homework4/hw4/Knn.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Homework4/hw4/MainHW4.class" afterPath="$PROJECT_DIR$/out/production/Homework4/hw4/MainHW4.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/hw4/Knn.java" afterPath="$PROJECT_DIR$/src/hw4/Knn.java" />
     </list>
     <ignored path="Homework4.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -43,8 +42,8 @@
       <file leaf-file-name="Knn.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/hw4/Knn.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="10.296774">
-              <caret line="534" column="40" selection-start-line="534" selection-start-column="40" selection-end-line="534" selection-end-column="40" />
+            <state vertical-scroll-proportion="10.432258">
+              <caret line="541" column="82" selection-start-line="541" selection-start-column="82" selection-end-line="541" selection-end-column="82" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#1310#1311#0" expanded="true" />
@@ -718,12 +717,12 @@
       <updated>1460962095082</updated>
       <workItem from="1460962096881" duration="35752000" />
       <workItem from="1461321934465" duration="1146000" />
-      <workItem from="1461436154088" duration="53120000" />
+      <workItem from="1461436154088" duration="53835000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="90018000" />
+    <option name="totallyTimeSpent" value="90733000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -905,8 +904,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/hw4/Knn.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="10.296774">
-          <caret line="534" column="40" selection-start-line="534" selection-start-column="40" selection-end-line="534" selection-end-column="40" />
+        <state vertical-scroll-proportion="10.432258">
+          <caret line="541" column="82" selection-start-line="541" selection-start-column="82" selection-end-line="541" selection-end-column="82" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#1310#1311#0" expanded="true" />
