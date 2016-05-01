@@ -87,9 +87,6 @@ public class Knn extends Classifier {
      * @param instances
      */
     private void noEdit(Instances instances) {
-        //normalize all instance data
-        //instances = normalize(instances);
-
         //reset all fields
         m_bestError = Double.MAX_VALUE;
         m_bestK = 1;
@@ -475,9 +472,6 @@ public class Knn extends Classifier {
             //create an empty instances object (our T)
             Instances newInstances = new Instances(instances,instances.numInstances());
 
-            //normalize the instances given as input to the KNN
-            //instances = normalize(instances);
-
             //the first instance will not be classified correctly, since T is empty, therefore we can add it
             newInstances.add(instances.instance(0));
             instances.delete(0); // remove the instance from the instances class
@@ -505,8 +499,6 @@ public class Knn extends Classifier {
         //         remove x from T
         //         Return T
 
-         //m_trainingInstances = normalize(instances);
-
          //after training the model and calculating the optimal functions and parameters
          //prune unrequired instances using the backwards method
          int endPoint = instances.numInstances();
@@ -528,27 +520,6 @@ public class Knn extends Classifier {
          m_bestError = crossValidationError(instances);
 
          }
-
-	/**
-	 * perform a normalization process over all instance features
-	 */
-	public Instances normalize(Instances instances){
-        try {
-            double means[] = new double[instances.numAttributes()];
-            double tempSum = 0;
-
-            Normalize norm = new Normalize();
-            norm.setInputFormat(instances);
-            Instances processed_training_data = Filter.useFilter(instances, norm);
-
-            return processed_training_data;
-        }
-        catch(Exception e)
-        {
-            System.out.println("An error has occured while attempting to normalize the dataset");
-            return null;
-        }
-	}
 
 	//Assistive methods - normalization of feature data
 
