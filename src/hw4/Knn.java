@@ -88,7 +88,7 @@ public class Knn extends Classifier {
      */
     private void noEdit(Instances instances) {
         //normalize all instance data
-        instances = normalize(instances);
+        //instances = normalize(instances);
 
         //reset all fields
         m_bestError = Double.MAX_VALUE;
@@ -476,7 +476,7 @@ public class Knn extends Classifier {
             Instances newInstances = new Instances(instances,instances.numInstances());
 
             //normalize the instances given as input to the KNN
-            instances = normalize(instances);
+            //instances = normalize(instances);
 
             //the first instance will not be classified correctly, since T is empty, therefore we can add it
             newInstances.add(instances.instance(0));

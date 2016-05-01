@@ -43,6 +43,9 @@ public class MainHW4 {
 		Instances dataSet_glass = loadData("glass.txt");
 		Instances dataSet_cancer = loadData("cancer.txt");
 
+        //remove the ID property from the glass dataset
+        dataSet_glass.deleteAttributeAt(0);
+
 		//run the knn nearest neighbor classification process (find lower cross validation error, giving best performance)
 		//using getclassvoteresult and getweightedclassvoteresult functions, all k values and all p values
 		Knn ourKnn = new Knn();
