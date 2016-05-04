@@ -162,6 +162,7 @@ public class Knn extends Classifier {
         //find neighbors of closest proximity
         Instances neighbors = findNearestNeighbors(instance,classifySet,m_currK);
 
+        //get class voting (highsted freq.)
         if(M_DISTFUNC==NON_WEIGHTED)
             resultClass = getClassVoteResult(neighbors);
         else
@@ -239,6 +240,7 @@ public class Knn extends Classifier {
                     }
 
                     }
+                
                 // remove pairs exceeding the k neighbors capacity limit
                 if (distList.size() > k) {
                     distList.remove(k);
@@ -248,8 +250,9 @@ public class Knn extends Classifier {
                 //if the list doesn't contain k elements yet
                 //and we haven't replaced an element from the list
                 //add this instance and its distance as the last ones in the list
-                if(distList.size()<k && added == false)
-                    distList.add(newp);
+                if(distList.size()<k)
+                    if(added == false)
+                        distList.add(newp);
             }
         }
 
@@ -357,7 +360,7 @@ public class Knn extends Classifier {
         int numAttributes = a.numAttributes();
         double distanceSum = 0;
 
-        for(int i = 0 ; i < numAttributes ; i++){
+        for(int i = 0 ; i < numAttributes-1 ; i++){
             distanceSum += Math.pow(Math.abs(a.value(i)-b.value(i)),M_P_VALUE);
         }
 
@@ -381,7 +384,7 @@ public class Knn extends Classifier {
         double evaluateSum = 0;
 
         //go over all attributes (features) and calculate the distance for each of them
-        for(int i = 0 ; i < numAttributes ; i++){
+        for(int i = 0 ; i < numAttributes-1 ; i++){
             //evaulate the current vector dimension size
             evaluateSum = Math.abs(a.value(i)-b.value(i));
             //if it is larger than the distance previously measured on another dimension replace it.
@@ -413,7 +416,7 @@ public class Knn extends Classifier {
         }
 
         //return the percent of errors, from the total instance number required for classification
-      return 1.0d - (correctClass / instances.numInstances());
+      return 1.0d - (correctClass / (double) instances.numInstances());
 	}
 
 	/**
@@ -432,9 +435,7 @@ public class Knn extends Classifier {
         //calc l-p distance using 90% of the instances
         //test hypothesis on the remaining 10%
 
-        for(int foldix = 0 ; foldix <= 9 ; foldix++) {
-            //System.out.println("current fold being evaluated is:"+foldix);
-
+        for(int foldix = 0 ; foldix <=M_FOLD_NUM-1 ; foldix++) {
             //get the division into 2 instance groups (9/10 ratio in our case), as 2 different Instances class objects
             instArray = getFoldInstances(subsetIndices[foldix],subsetIndices[foldix+1],instances);
 
@@ -465,25 +466,25 @@ public class Knn extends Classifier {
 	 * should train your Knn algorithm using the edited Knn forwards algorithm shown in class
 	 */
 		public void	editedForward(Instances instances){
-
-//            Random randGen = new Random();
-//            instances.randomize(randGen);
-
             //create an empty instances object (our T)
-            Instances newInstances = new Instances(instances,instances.numInstances());
+            m_trainingInstances = new Instances(instances,instances.numInstances());
 
-            //the first instance will not be classified correctly, since T is empty, therefore we can add it
-            newInstances.add(instances.instance(0));
-            instances.delete(0); // remove the instance from the instances class
+            //the first instance will not be classified correctly, since T is empty, therefore we can add k instances as
+            //the best k defines
+            for(int i =0 ; i < getM_bestK() ; i++) {
+                m_trainingInstances.add(instances.instance(i));
+                instances.delete(i); // remove the instance from the instances class
+            }
+
 
             //each one of the remaining instances is to be checked according to the above logic
             for(int i = 0; i < instances.numInstances(); i++){
-                if(classify(instances.instance(i),newInstances)!=instances.instance(i).classValue()){
-                    newInstances.add(instances.instance(i));
+                if(classify(instances.instance(i),m_trainingInstances)!=instances.instance(i).classValue()){
+                    m_trainingInstances.add(instances.instance(i));
                 }
             }
 
-            m_bestError = crossValidationError(newInstances);
+            m_bestError = crossValidationError(m_trainingInstances);
         }
 
 	/**
@@ -504,20 +505,20 @@ public class Knn extends Classifier {
          int endPoint = instances.numInstances();
          int currIx = 0;
 
-         //// TODO: 28/04/2016 see this running
-         while(currIx!=endPoint){
-             Instance currInst = instances.instance(currIx);
-             instances.delete(currIx);
-             if(classify(currInst,instances)!=currInst.classValue()) {
-                 instances.add(currInst);
-                 currIx++;
-             }else{
-                 endPoint--;
-             }
+         //set the given instances as the base set (starting point)
+         m_trainingInstances = instances;
+
+        for(int i = 0 ; i< instances.numInstances(); i++) {
+            //classify each instance with the given training instances set
+            if (classify(instances.instance(i), m_trainingInstances) == m_trainingInstances.instance(i).classValue()){
+                m_trainingInstances.delete(i);
+        }
+
+
          }
 
          //calculate the error and the time it takes on average to calculate the error for each fold
-         m_bestError = crossValidationError(instances);
+         m_bestError = crossValidationError(m_trainingInstances);
 
          }
 
@@ -530,10 +531,9 @@ public class Knn extends Classifier {
      */
     private int[] foldIndices(Instances instances, int foldNum){
         //divide to the nearest integer value possible (last set might be smaller than int value by remainder)
-        int instCount = (int) Math.ceil( (double) instances.numInstances() / foldNum); //rounded version of course
-        //int remainder = m_trainingInstances.numInstances() % foldNum;
-        //int addOne = (remainder > 0) ? 1 : 0;
-        int[] foldIndexArray = new int[11];
+        int instCount = (int) Math.floor( (double) instances.numInstances() / foldNum); //rounded version of course
+
+        int[] foldIndexArray = new int[M_FOLD_NUM+1];
         int multiplier = 1;
         int ix = 0;
         foldIndexArray[0] = 0;
@@ -545,6 +545,7 @@ public class Knn extends Classifier {
 
             if(multiplier==10){
                     foldIndexArray[10] = instances.numInstances();
+                    break;
             }
         }
 
