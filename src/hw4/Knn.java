@@ -190,9 +190,6 @@ public class Knn extends Classifier {
             neighborMap.put(distance(neighborhood.instance(i),instance),neighborhood.instance(i));
         }
 
-        if(k == 20)
-            System.out.println("kool");
-
         //sort map by simply creating a new treemap
         TreeMap<Double,Instance> neiMap = new TreeMap<>(neighborMap);
 
@@ -200,11 +197,13 @@ public class Knn extends Classifier {
         for (int i = k ; i < neighborhood.numInstances() ; i++){
             double curDistance = distance(neighborhood.instance(i),instance);
             if (curDistance > neiMap.firstKey() || curDistance < neiMap.lastKey()) {
-                //insert the key and instance
-                neiMap.put(curDistance,neighborhood.instance(i));
+               if(!neiMap.containsKey(curDistance)) {
+                   //insert the key and instance
+                   neiMap.put(curDistance, neighborhood.instance(i));
 
-                //remove the last entry - as it is no longer within the constraints of k elements wanted
-                neiMap.remove(neiMap.lastKey());
+                   //remove the last entry - as it is no longer within the constraints of k elements wanted
+                   neiMap.remove(neiMap.lastKey());
+               }
             }
         }
 
@@ -219,92 +218,6 @@ public class Knn extends Classifier {
 
         return neighbors;
     }
-//        //given an instance - find it's k nearest neighbors.
-//        //HOW: locate the k neighbors that have the minimal distance from the given instance.
-//        ArrayList<Pair<Double,Instance>> distList = new ArrayList<Pair<Double, Instance>>(k);
-//        double currDist ; // the current distance
-//        boolean added = false; //did we add an element the k neighbors list
-//        Instances neighbors = new Instances(neighborhood,neighborhood.numInstances());
-//        Enumeration<Instance> instEnum;
-//        // classify each instance according to its proximity to the instance in question. Do this for the 5 best instances,
-//        // in case one instance is closer than another - remove all instance farther away and keep it.
-//
-//        //when training the KNN model to find the optimal parameters, we only use 9/10 instances (as the folds dictate)
-//        //when this process is done, the neighbors are to be calculated over the whole dataset.
-//        instEnum = neighborhood.enumerateInstances();
-//
-//        //The solution to find the k closet elements to the instance, will be implemented using an arraylist of pairs
-//        //the pairs will be of double and instance classes. Meaning, each key will be the distance and the value will
-//        //be the instance associated with it.
-//        //we will iterate over all possible instances and set only the k most proximal.
-//        while(instEnum.hasMoreElements()){
-//            //reset the added boolean
-//            added = false;
-//
-//            //get the next instance from the instances list
-//            Instance currInst = instEnum.nextElement();
-//
-//            //get the distance according to the distance function being used
-//            currDist = distance(instance,currInst);
-//
-//            //create an iterator to go over the arraylist of closest instances
-//            ListIterator listIter = distList.listIterator();
-//
-//            //create a new pair to be used in case we will be adding this instance and its distance to the neighbors list
-//            Pair newp = new Pair(currDist, currInst);
-//
-//            //first element - for the first time the list is being checked
-//            if(distList.isEmpty())
-//                distList.add(newp);
-//            else {
-//                //go over all instances and evaluate their distance from the current instance being checked
-//                while (listIter.hasNext()) {
-//                    //get the current pair
-//                    Pair currPair = (Pair) listIter.next();
-//
-//                    //get current distance
-//                    double currDistofInst = (Double) currPair.getKey();
-//
-//                    //check whether the current distance is smaller than one of the existing distances of instances in the
-//                    //arraylist we've created.
-//                    if (currDistofInst > currDist) {
-//                        //add the new instance and its distance to the list, in the appropriate position in ascending distance order
-//                        if (distList.indexOf(currPair) != 0)
-//                            distList.add(distList.indexOf(currPair) - 1, newp);
-//                        else
-//                            distList.add(0, newp); //if it is the first position to be handled and replaced
-//
-//                        added = true;
-//                        break;//instance added to our neighbors list, stop iterating over the current list
-//                    }
-//
-//                    }
-//
-//                // remove pairs exceeding the k neighbors capacity limit
-//                if (distList.size() > k) {
-//                    distList.remove(k);
-//                    added = true;
-//                }
-//
-//                //if the list doesn't contain k elements yet
-//                //and we haven't replaced an element from the list
-//                //add this instance and its distance as the last ones in the list
-//                if(distList.size()<k)
-//                    if(added == false)
-//                        distList.add(newp);
-//            }
-//        }
-//
-//        //create neighbors instances object
-//        ListIterator<Pair<Double,Instance>> neiList = distList.listIterator();
-//
-//        //add all the instances to the neighbors list
-//        while(neiList.hasNext()){
-//            neighbors.add(neiList.next().getValue());
-//        }
-//
-//        return neighbors;
-//    }
 
     /**
      * should take a vote on what the class of the neighbors are and return the class value with the most votes

@@ -82,7 +82,7 @@ public class MainHW4 {
 
 		//run the KNN classifier on the glass data, using the 3 possible methods - no edit, backwards edit and forward edit
 		//return for each method the error and the resulting computation speed after pruning the dataset
-		ourKnn.buildClassifier(dataSet_cancer); //this will result in the regular no edit model running (default)
+		ourKnn.buildClassifier(dataSet_glass); //this will result in the regular no edit model running (default)
 
 		String CVEnoEdit = "Cross validation error of non-edited knn on glass dataset is "+ourKnn.getM_bestError()+" and the average elapsed time is "+ourKnn.m_calcTimeAvg;
 		System.out.println(CVEnoEdit);
@@ -90,7 +90,7 @@ public class MainHW4 {
 
 		//run the backwards edit KNN classifier after finding the best parameters in the non edited section
 		ourKnn.setM_MODE("backward");
-		ourKnn.buildClassifier(dataSet_cancer);
+		ourKnn.buildClassifier(dataSet_glass);
 
 		String CVEbackward = "Cross validation error of backwards-edited knn on glass dataset is "+ourKnn.getM_bestError() +" and the average elapsed time is "+ourKnn.m_calcTimeAvg;
 		System.out.println(CVEbackward);
@@ -98,7 +98,7 @@ public class MainHW4 {
 
 		//run the forward edit KNN classifier after finding the optimal parameters
 		ourKnn.setM_MODE("forward");
-		ourKnn.buildClassifier(dataSet_cancer);
+		ourKnn.buildClassifier(dataSet_glass);
 
 		String CVEforward = "Cross validation error of forwards-edited knn on glass dataset is "+ourKnn.getM_bestError() +" and the average elapsed time is "+ourKnn.m_calcTimeAvg;
 		System.out.println(CVEforward);
