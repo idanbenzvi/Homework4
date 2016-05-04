@@ -163,7 +163,7 @@ public class Knn extends Classifier {
         Instances neighbors = findNearestNeighbors(instance,classifySet,m_currK);
 
         //get class voting (highsted freq.)
-        if(M_DISTFUNC==NON_WEIGHTED)
+        if(M_DISTFUNC==0)
             resultClass = getClassVoteResult(neighbors);
         else
             resultClass = getWeightedClassVoteResult(neighbors,instance);
@@ -183,7 +183,8 @@ public class Knn extends Classifier {
         //insert k first instances into our neighbor array and start improvements afterward
             TreeMap<Double,Instance> neighborMap = new TreeMap<>();
 
-        Instances neighbors = new Instances(neighborhood,neighborhood.numInstances());
+        //init an empty neighbors instance class instance - will be returned later on
+        Instances neighbors = new Instances(neighborhood,k);
 
         //insert regardless of distance values
         for(int i = 0 ;  i < k ; i++){
@@ -210,9 +211,10 @@ public class Knn extends Classifier {
         //return instances set with the nearest neighbors :)
         Set<Double> keys = neiMap.keySet();
 
-        //key (distances) iterator
+        //key (distances) iterator, which will be used in order to retrieve all the values (instances) and return the instances class
         Iterator<Double> keyIter = keys.iterator();
 
+        //get all instances with the minimal distances
         while(keyIter.hasNext())
             neighbors.add(neiMap.get(keyIter.next()));
 
@@ -265,17 +267,22 @@ public class Knn extends Classifier {
         //go over all k instances
         for(int j = 0 ; j < instances.numInstances() ; j++){
             //measure the distance of the current instance from the evaluated instance
-            currDistance = Math.pow((double) 1 / lPDistance(instances.instance(j),instanceClassified),2);
-            //add the measured distance to the relevant class value
-            classValueFreq[(int) instances.instance(j).classValue()] += currDistance ;
+            if(distance(instances.instance(j),instanceClassified)==0)
+                return instanceClassified.classValue();
+            else {
+                currDistance = 1.0 / Math.pow(distance(instances.instance(j), instanceClassified), 2);
+                //add the measured distance to the relevant class value
+                classValueFreq[(int) instances.instance(j).classValue()] += currDistance;
+            }
         }
 
-        //find maximal frequency
+        //find maximal frequency by going over the array of sums, each index is a class value
         for (int k = 0 ; k < classValueFreq.length ; k++){
             if (classValueFreq[k] > maxFreqClass)
                 maxFreqClass = k;
         }
 
+        //return most frequent class value
         return maxFreqClass;
     }
 
@@ -294,7 +301,6 @@ public class Knn extends Classifier {
             else
                 distance = lInfinityDistance(a, b);
 
-
         return distance;
 	}
 
@@ -312,11 +318,12 @@ public class Knn extends Classifier {
         int numAttributes = a.numAttributes();
         double distanceSum = 0;
 
+        //calculate distance for each attribute of the instances
         for(int i = 0 ; i < numAttributes-1 ; i++){
             distanceSum += Math.pow(Math.abs(a.value(i)-b.value(i)),M_P_VALUE);
         }
 
-        distanceSum = Math.pow(distanceSum,(double) 1/M_P_VALUE);
+        distanceSum = Math.pow(distanceSum, 1.0/M_P_VALUE);
 
         return distanceSum;
 	}
@@ -356,19 +363,19 @@ public class Knn extends Classifier {
 	private double calcAvgError(Instances instances,Instances classifySet){
         Enumeration instEnum = instances.enumerateInstances();
         double classification ;
-        double correctClass = 0;
+        double incorrectClass = 0;
 
         //classify and compare to actual class value, count the number of correct classifications
         while(instEnum.hasMoreElements()) {
             Instance currentElement = (Instance) instEnum.nextElement();
             classification = classify(currentElement,classifySet);
 
-            if(currentElement.classValue()==classification)
-                correctClass++;
+            if(currentElement.classValue()!=classification)
+                incorrectClass++;
         }
 
         //return the percent of errors, from the total instance number required for classification
-      return 1.0d - (correctClass / (double) instances.numInstances());
+      return incorrectClass / instances.numInstances();
 	}
 
 	/**
