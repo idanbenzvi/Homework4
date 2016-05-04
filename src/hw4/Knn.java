@@ -416,7 +416,7 @@ public class Knn extends Classifier {
 
         //divide the sum of errors by the number of folds to calculate the cross validation error
         cvError /= M_FOLD_NUM;
-        m_calcTimeAvg = calcTimeAvg / (long) M_FOLD_NUM;
+        m_calcTimeAvg = calcTimeAvg / M_FOLD_NUM;
 
         return cvError;
 	}
@@ -429,20 +429,21 @@ public class Knn extends Classifier {
             m_trainingInstances = new Instances(instances,instances.numInstances());
 
             //the first instance will not be classified correctly, since T is empty, therefore we can add k instances as
-            //the best k defines
+            //a starting point
             for(int i =0 ; i < getM_bestK() ; i++) {
                 m_trainingInstances.add(instances.instance(i));
                 instances.delete(i); // remove the instance from the instances class
             }
 
 
-            //each one of the remaining instances is to be checked according to the above logic
+            //each one of the remaining instances is to be checked according to the logic shown in class
             for(int i = 0; i < instances.numInstances(); i++){
                 if(classify(instances.instance(i),m_trainingInstances)!=instances.instance(i).classValue()){
                     m_trainingInstances.add(instances.instance(i));
                 }
             }
 
+            //set error as the crossvalidation error
             m_bestError = crossValidationError(m_trainingInstances);
         }
 
